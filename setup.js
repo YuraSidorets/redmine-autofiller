@@ -13,6 +13,14 @@
        '<option value="57">Vacation</option>' +
        '</select></p>';
 
+    var hoursHTML = 
+        '<p><label for="hours_per_day_id">Hours per day</label>' +
+        '<input id="hours_per_day_id" type="text" value="8" size="2"></p>';
+
+    var projectHTML = 
+        '<p><label for="project_id">Project ID</label>' +
+        '<input id="project_id" type="text" value="givenimaging" size="15"></p>';
+
     var progressHTML = 
        '<h2>Please wait...</h2><p id="randomQuote"><p><p id="randomAuthor"></p><progress id="progressBar"></progress>';
 
@@ -22,7 +30,7 @@
         return dd;
     };
 
-    var postDates = function(debugMode, activityId, issueId, hours, entriesToPost) {
+    var postDates = function(debugMode, activityId, issueId, hours, projectId, entriesToPost) {
         if (entriesToPost.length === 0) {
             var maxVal = $("#progressBar").attr('max');
             $("#progressBar").val(maxVal);
@@ -34,8 +42,8 @@
             $("#progressBar").val(oldVal + 1);
             var strDate = entriesToPost[0];
             var slicedArray = entriesToPost.slice(1);
-            var nextCall = postDates.bind(null, debugMode, activityId, issueId, hours, slicedArray);
-            var entryToLog = {         
+            var nextCall = postDates.bind(null, debugMode, activityId, issueId, hours, projectId, slicedArray);
+            var entryToLog = {
                 "time_entry[activity_id]": activityId,
                 "time_entry[comments]": "",
                 "time_entry[hours]": ("" + hours),
@@ -46,7 +54,7 @@
                 console.log(entryToLog);
                 setTimeout(nextCall, 1000);
             } else {
-                $.post("/projects/givenimaging/timelog/edit", entryToLog, nextCall);
+                $.post("/projects/" + projectId + "/timelog/edit", entryToLog, nextCall);
             }
         }
     };
@@ -60,6 +68,8 @@
 
         var activityId = $("#time_entry_activity_id").val();
         var issueId = $("#time_entry_issue_id").val();
+        var hoursPerDay = $("#hours_per_day_id").val();
+        var projectId = $("#project_id").val();
         var totalTime = 0;
         var entriesToPost = [];
         if (issueId == "") {
@@ -68,6 +78,8 @@
             alert("Issue number is not a valid number");
         } else if (activityId == "") {
             alert("Please select Activity");
+        } else if (projectId == "") {
+            alert("Please enter Project ID");
         } else if (dates.length === 0) {
             alert("No date selected!");
         } else {
@@ -83,7 +95,7 @@
                     totalTime += 8;
                 }
             }
-            var questionMessage = "Are you sure you want to log " + totalTime + " hours?\n";
+            var questionMessage = "Are you sure you want to log " + totalTime.toFixed(2) + " hours?\n";
             var debugMode = !!window.debug;
             if (debugMode) {
                 questionMessage += "(Don't worry, it's in debug mode. No real logging will be done)";
@@ -103,7 +115,7 @@
                 }
                 $("#progressBar").val(0);
                 $.getScript("http://api.forismatic.com/api/1.0/?method=getQuote&format=jsonp&lang=en&jsonp=showQuote");
-                postDates(debugMode, activityId, issueId, 8, entriesToPost);
+                postDates(debugMode, activityId, issueId, hours, projectId, entriesToPost);
             }
         }        
     };
@@ -168,8 +180,12 @@
         button = $("<button/>").text("Clear selection").click(clearDates);
         actionWrapper.append(button);
 
-
-        var el = $(selectorHTML);
+        var el;
+        el = $(projectHTML);
+        $("#fillWrapper").prepend(el);
+        el = $(hoursHTML);
+        $("#fillWrapper").prepend(el);
+        el = $(selectorHTML);
         $("#fillWrapper").prepend(el);
         el = $(issueNumberHTML);
         $("#fillWrapper").prepend(el);
