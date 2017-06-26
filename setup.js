@@ -1,10 +1,10 @@
 ﻿(function($) {
     var issueNumberHTML = 
         '<p><label for="time_entry_issue_id">Issue number</label>' +
-        '<input id="time_entry_issue_id" type="text" value="" size="6" name="time_entry[issue_id]"></p>';
+        '<input id="time_entry_issue_id" type="text" value="" size="6"></p>';
 
     var selectorHTML = 
-       '<p><label for="time_entry_activity_id">Activity</label><select id="time_entry_activity_id" name="time_entry[activity_id]">' +
+       '<p><label for="time_entry_activity_id">Activity</label><select id="time_entry_activity_id">' +
        '<option value="">--- Please select ---</option>' +
        '<option value="9">Development</option>' +
        '<option value="16">Testing</option>' +
@@ -63,6 +63,10 @@
         return /^\d+$/.test(value);
     };
 
+    var isFloatNumber = function(value) {
+        return /^(\d*[.])?\d+$/.test(value);
+    };
+
     var clickOnFill = function() {
         var dates = $("#calendarPH").multiDatesPicker("getDates", "object");
 
@@ -71,11 +75,18 @@
         var hoursPerDay = $("#hours_per_day_id").val();
         var projectId = $("#project_id").val();
         var totalTime = 0;
+        var hours = parseFloat(hoursPerDay);
         var entriesToPost = [];
         if (issueId == "") {
             alert("Please fill Issue number");
         } else if (!isNumeric(issueId)) {
             alert("Issue number is not a valid number");
+        } else if (hoursPerDay == "") {
+            alert("Please fill Hours per day");
+        } else if (!isFloatNumber(hoursPerDay)) {
+            alert("Hours per day is not a valid float number");
+        } else if (hours < 0.5 || hours > 8) {
+            alert("Hours per day should be between 0.5. and 8");
         } else if (activityId == "") {
             alert("Please select Activity");
         } else if (projectId == "") {
@@ -92,7 +103,7 @@
                     console.log("Error in month:" + strDate + " " + (originMonth + 1));
                 } else {
                     entriesToPost.push(strDate);
-                    totalTime += 8;
+                    totalTime += hours;
                 }
             }
             var questionMessage = "Are you sure you want to log " + totalTime.toFixed(2) + " hours?\n";
