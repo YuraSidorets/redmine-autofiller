@@ -1,10 +1,10 @@
 ﻿(function($) {
     var issueNumberHTML = 
         '<p><label for="time_entry_issue_id">Issue number</label>' +
-        '<input id="time_entry_issue_id" type="text" value="" size="6"></p>';
+        '<input id="time_entry_issue_id" type="text" value="" size="6" name="time_entry[issue_id]"></p>';
 
     var selectorHTML = 
-       '<p><label for="time_entry_activity_id">Activity</label><select id="time_entry_activity_id">' +
+       '<p><label for="time_entry_activity_id">Activity</label><select id="time_entry_activity_id" name="time_entry[activity_id]">' +
        '<option value="">--- Please select ---</option>' +
        '<option value="9">Development</option>' +
        '<option value="16">Testing</option>' +
@@ -12,10 +12,6 @@
        '<option value="56">Sick leave</option>' +
        '<option value="57">Vacation</option>' +
        '</select></p>';
-
-    var hoursHTML = 
-        '<p><label for="hours_per_day_id">Hours per day</label>' +
-        '<input id="hours_per_day_id" type="text" value="8" size="2"></p>';
 
     var progressHTML = 
        '<h2>Please wait...</h2><p id="randomQuote"><p><p id="randomAuthor"></p><progress id="progressBar"></progress>';
@@ -39,7 +35,7 @@
             var strDate = entriesToPost[0];
             var slicedArray = entriesToPost.slice(1);
             var nextCall = postDates.bind(null, debugMode, activityId, issueId, hours, slicedArray);
-            var entryToLog = {
+            var entryToLog = {         
                 "time_entry[activity_id]": activityId,
                 "time_entry[comments]": "",
                 "time_entry[hours]": ("" + hours),
@@ -59,29 +55,17 @@
         return /^\d+$/.test(value);
     };
 
-    var isFloatNumber = function(value) {
-        return /^(\d*[.])?\d+$/.test(value);
-    };
-
     var clickOnFill = function() {
         var dates = $("#calendarPH").multiDatesPicker("getDates", "object");
 
         var activityId = $("#time_entry_activity_id").val();
         var issueId = $("#time_entry_issue_id").val();
-        var hoursPerDay = $("#hours_per_day_id").val();
         var totalTime = 0;
-        var hours = parseFloat(hoursPerDay);
         var entriesToPost = [];
         if (issueId == "") {
             alert("Please fill Issue number");
         } else if (!isNumeric(issueId)) {
             alert("Issue number is not a valid number");
-        } else if (hoursPerDay == "") {
-            alert("Please fill Hours per day");
-        } else if (!isFloatNumber(hoursPerDay)) {
-            alert("Hours per day is not a valid float number");
-        } else if (hours < 0.5 || hours > 8) {
-            alert("Hours per day should be between 0.5. and 8");
         } else if (activityId == "") {
             alert("Please select Activity");
         } else if (dates.length === 0) {
@@ -96,7 +80,7 @@
                     console.log("Error in month:" + strDate + " " + (originMonth + 1));
                 } else {
                     entriesToPost.push(strDate);
-                    totalTime += hours;
+                    totalTime += 8;
                 }
             }
             var questionMessage = "Are you sure you want to log " + totalTime + " hours?\n";
@@ -119,7 +103,7 @@
                 }
                 $("#progressBar").val(0);
                 $.getScript("http://api.forismatic.com/api/1.0/?method=getQuote&format=jsonp&lang=en&jsonp=showQuote");
-                postDates(debugMode, activityId, issueId, hours, entriesToPost);
+                postDates(debugMode, activityId, issueId, 8, entriesToPost);
             }
         }        
     };
@@ -185,10 +169,7 @@
         actionWrapper.append(button);
 
 
-        var el;
-        el = $(hoursHTML);
-        $("#fillWrapper").prepend(el);
-        el = $(selectorHTML);
+        var el = $(selectorHTML);
         $("#fillWrapper").prepend(el);
         el = $(issueNumberHTML);
         $("#fillWrapper").prepend(el);
