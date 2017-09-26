@@ -215,7 +215,6 @@
     var showCalendar = function() {
         $("#calendarPH").multiDatesPicker({ firstDay: 1 });
         setWorkingDates();
-        fillIssueNumbers();
 
         var actionWrapper = $("<div id='actionWrapper' class='actionWrapper'></div>");
         $("#fillWrapper").append(actionWrapper);
@@ -239,6 +238,7 @@
         el = $("<h2>Autofill script</h2>");
         $("#fillWrapper").prepend(el);
 
+        fillIssueNumbers();
         $("#time_entry_issue_id").change(setProjectIdentifier);
     };
 
