@@ -1,7 +1,8 @@
 ﻿(function($) {
     var issueNumberHTML = 
-        '<p><label for="time_entry_issue_id">Issue number</label>' +
-        '<input id="time_entry_issue_id" type="text" value="" size="6"></p>';
+       '<p><label for="time_entry_issue_id">Issue</label><select id="time_entry_issue_id">' +
+       '<option value="" data-proj-identifier="">--- Please select ---</option>' +
+       '</select></p>';
 
     var selectorHTML = 
        '<p><label for="time_entry_activity_id">Activity</label><select id="time_entry_activity_id">' +
@@ -19,7 +20,7 @@
 
     var projectHTML = 
         '<p><label for="project_id">Project ID</label>' +
-        '<input id="project_id" type="text" value="givenimaging" size="15"></p>';
+        '<input id="project_id" type="text" value="" size="15" readonly class="readonly"></p>';
 
     var progressHTML = 
        '<h2>Please wait...</h2><p id="randomQuote"><p><p id="randomAuthor"></p><progress id="progressBar"></progress>';
@@ -78,7 +79,7 @@
         var hours = parseFloat(hoursPerDay);
         var entriesToPost = [];
         if (issueId == "") {
-            alert("Please fill Issue number");
+            alert("Please select Issue");
         } else if (!isNumeric(issueId)) {
             alert("Issue number is not a valid number");
         } else if (hoursPerDay == "") {
@@ -94,40 +95,44 @@
         } else if (dates.length === 0) {
             alert("No date selected!");
         } else {
-            var originMonth = new Date().getMonth();
-            for(var i = 0; i < dates.length; ++i) {
-                var dd = new Date(dates[i].valueOf());
-                dd = convertToUtc(dd);
-                var strDate = dd.toISOString().slice(0, 10);
-                if (parseInt(strDate.slice(5, 7), 10) !== (originMonth + 1)) {
-                    console.log("Error in month:" + strDate + " " + (originMonth + 1));
-                } else {
-                    entriesToPost.push(strDate);
-                    totalTime += hours;
+            verifyIssueInfo(+issueId, projectId, function() {
+                var originMonth = new Date().getMonth();
+                for(var i = 0; i < dates.length; ++i) {
+                    var dd = new Date(dates[i].valueOf());
+                    dd = convertToUtc(dd);
+                    var strDate = dd.toISOString().slice(0, 10);
+                    if (parseInt(strDate.slice(5, 7), 10) !== (originMonth + 1)) {
+                        console.log("Error in month:" + strDate + " " + (originMonth + 1));
+                    } else {
+                        entriesToPost.push(strDate);
+                        totalTime += hours;
+                    }
                 }
-            }
-            var questionMessage = "Are you sure you want to log " + totalTime.toFixed(2) + " hours?\n";
-            var debugMode = !!window.debug;
-            if (debugMode) {
-                questionMessage += "(Don't worry, it's in debug mode. No real logging will be done)";
-            } else {
-                questionMessage += "(CAUTION! Real logging will be done!)";
-            }
-            if (confirm(questionMessage)) {
-                $("#fillWrapper").hide();
-                if ($("#progressWrapper").length === 0) {
-                    var progressWrapper = $("<div id='progressWrapper' class='progressWrapper'></div>");
-                    var progressBar = $(progressHTML);
-                    progressBar.attr('max', entriesToPost.length);
-                    progressWrapper.append(progressBar);
-                    $("#mainHolder").prepend(progressWrapper);
+                var questionMessage = "Are you sure you want to log " + totalTime.toFixed(2) + " hours?\n";
+                var debugMode = !!window.debug;
+                if (debugMode) {
+                   questionMessage += "(Don't worry, it's in debug mode. No real logging will be done)";
                 } else {
-                    $("#progressWrapper").show();
+                    questionMessage += "(CAUTION! Real logging will be done!)";
                 }
-                $("#progressBar").val(0);
-                $.getScript("http://api.forismatic.com/api/1.0/?method=getQuote&format=jsonp&lang=en&jsonp=showQuote");
-                postDates(debugMode, activityId, issueId, hours, projectId, entriesToPost);
-            }
+                if (confirm(questionMessage)) {
+                    $("#fillWrapper").hide();
+                    if ($("#progressWrapper").length === 0) {
+                        var progressWrapper = $("<div id='progressWrapper' class='progressWrapper'></div>");
+                        var progressBar = $(progressHTML);
+                        progressBar.attr('max', entriesToPost.length);
+                        progressWrapper.append(progressBar);
+                        $("#mainHolder").prepend(progressWrapper);
+                    } else {
+                        $("#progressWrapper").show();
+                    }
+                    $("#progressBar").val(0);
+                    $.getScript("http://api.forismatic.com/api/1.0/?method=getQuote&format=jsonp&lang=en&jsonp=showQuote");
+                    postDates(debugMode, activityId, issueId, hours, projectId, entriesToPost);
+                }
+            }, function(message) {
+                alert(message);
+            });
         }        
     };
 
@@ -141,6 +146,7 @@
     };
 
     var holidays = [];
+    var prjList = [];
 
     var setWorkingDates = function() {
         $("#calendarPH").multiDatesPicker('resetDates', 'picked');
@@ -177,9 +183,39 @@
         return dates;
     };
 
+    var fillIssueNumbers = function() {
+        $.get("/projects.xml", function(projects) {
+            var text = new XMLSerializer().serializeToString(projects);
+            var xmlDoc = $.parseXML(text);
+            var xml = $(xmlDoc);
+            prjList = xml.find("project");
+            $.get("/issues?assigned_to_id=me&set_filter=1&format=json", function(myIssues) {
+                for(var i = 0; i < myIssues.length; ++i) {
+                    var projectIdentifier = "UNKNOWN";
+                    for(var j = 0; j < prjList.length; ++j) {
+                        var idStr = prjList.eq(j).find("id").text();
+                        if (+idStr === myIssues[i].project_id) {
+                            projectIdentifier = prjList.eq(j).find("identifier").text()
+                            break;
+                        }
+                    }
+                    var issueDisplayName = "#" + myIssues[i].id + ": " + myIssues[i].subject + " [" + projectIdentifier + "]";
+                    $("#time_entry_issue_id").append("<option value='" + myIssues[i].id + "' data-proj-identifier='" + projectIdentifier + 
+                                                     "'>"+ issueDisplayName  + "</option>");
+                }
+            });
+        });
+    };
+
+    var setProjectIdentifier = function(a, b, c) {
+        var projIdentifier = $("#time_entry_issue_id option:selected").attr("data-proj-identifier");
+        $("#project_id").val(projIdentifier);
+    };
+
     var showCalendar = function() {
-         $("#calendarPH").multiDatesPicker({ firstDay: 1 });
-         setWorkingDates();
+        $("#calendarPH").multiDatesPicker({ firstDay: 1 });
+        setWorkingDates();
+        fillIssueNumbers();
 
         var actionWrapper = $("<div id='actionWrapper' class='actionWrapper'></div>");
         $("#fillWrapper").append(actionWrapper);
@@ -202,6 +238,8 @@
         $("#fillWrapper").prepend(el);
         el = $("<h2>Autofill script</h2>");
         $("#fillWrapper").prepend(el);
+
+        $("#time_entry_issue_id").change(setProjectIdentifier);
     };
 
     window.setup = function() {
