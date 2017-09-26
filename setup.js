@@ -95,7 +95,6 @@
         } else if (dates.length === 0) {
             alert("No date selected!");
         } else {
-            verifyIssueInfo(+issueId, projectId, function() {
                 var originMonth = new Date().getMonth();
                 for(var i = 0; i < dates.length; ++i) {
                     var dd = new Date(dates[i].valueOf());
@@ -129,11 +128,8 @@
                     $("#progressBar").val(0);
                     $.getScript("http://api.forismatic.com/api/1.0/?method=getQuote&format=jsonp&lang=en&jsonp=showQuote");
                     postDates(debugMode, activityId, issueId, hours, projectId, entriesToPost);
-                }
-            }, function(message) {
-                alert(message);
-            });
-        }        
+            }
+        }
     };
 
     window.showQuote = function(data) {
