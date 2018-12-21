@@ -126,7 +126,7 @@
                         $("#progressWrapper").show();
                     }
                     $("#progressBar").val(0);
-                    $.getScript("http://api.forismatic.com/api/1.0/?method=getQuote&format=jsonp&lang=en&jsonp=showQuote");
+                    $.getScript("https://api.forismatic.com/api/1.0/?method=getQuote&format=jsonp&lang=en&jsonp=showQuote");
                     postDates(debugMode, activityId, issueId, hours, projectId, entriesToPost);
             }
         }
@@ -167,7 +167,10 @@
             var isHoliday = false;
             var isWeekEnd = dd.getDay() === 6 || dd.getDay() === 0;
             for(var j = 0; j < holidays.length; ++j) {
-                if (holidays[j].date.day===i) {
+                if ((holidays[j].date.day === i) 
+                    && (holidays[j].englishName !== "Extra Working Day")
+                    && (holidays[j].englishName !== "Holiday")
+                    && (holidays[j].localName !== "\u0421\u0432\u044f\u0442\u043e")) {
                     isHoliday = true;
                     break;
                 }

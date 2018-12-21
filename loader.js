@@ -1,6 +1,6 @@
 ﻿(function($) {
  $("<div id='ldr'>Loading...</div>").prependTo("#content");
- var debugMode = !!window.debug,sevice=debugMode?"rawgit.com":"cdn.rawgit.com",
+ var debugMode = !!window.debug,sevice=debugMode?"raw.githack.com":"raw.githack.com",
  gH="https://"+sevice+"/s-iaroshenko",br=debugMode?"test":"master";
  $.ajax(gH+"/redmine-autofiller/"+br+"/autofill.css").done(function(css){
   $("<style type='text/css'>"+css+"</style>").appendTo("head");
