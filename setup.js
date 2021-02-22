@@ -10,6 +10,9 @@
        '<option value="9">Development</option>' +
        '<option value="16">Testing</option>' +
        '<option value="20">Graphic Design</option>' +
+       '<option value="18">Management</option>' +
+       '<option value="31">Administration</option>' +
+       '<option value="53">Administrative time</option>' +
        '<option value="56">Sick leave</option>' +
        '<option value="57">Vacation</option>' +
        '</select></p>';
