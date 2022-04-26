@@ -192,11 +192,12 @@
             var xml = $(xmlDoc);
             prjList = xml.find("project");
             $.get("/issues?assigned_to_id=me&set_filter=1&format=json", function(myIssues) {
+                myIssues = myIssues.issues;
                 for(var i = 0; i < myIssues.length; ++i) {
                     var projectIdentifier = "UNKNOWN";
                     for(var j = 0; j < prjList.length; ++j) {
                         var idStr = prjList.eq(j).find("id").text();
-                        if (+idStr === myIssues[i].project_id) {
+                        if (+idStr === myIssues[i].project.id) {
                             projectIdentifier = prjList.eq(j).find("identifier").text()
                             break;
                         }
@@ -217,6 +218,9 @@
     var showCalendar = function() {
         $("#calendarPH").multiDatesPicker({ firstDay: 1 });
         setWorkingDates();
+
+        //$('.ui-datepicker').show();
+        //$('.ui-datepicker-prev, .ui-datepicker-next').show();
 
         var actionWrapper = $("<div id='actionWrapper' class='actionWrapper'></div>");
         $("#fillWrapper").append(actionWrapper);

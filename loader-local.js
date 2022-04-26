@@ -1,11 +1,12 @@
 ﻿(function($) {
  $("<div id='ldr'>Loading...</div>").prependTo("#content");
  var debugMode = !!window.debug,sevice=debugMode?"rawgit.com":"cdn.rawgit.com",
- gH="https://"+sevice+"/s-iaroshenko",
+ gH="https://"+sevice+"/yurasidorets",
  gHLocal = "http://127.0.0.1:81/", brLocal="";
  $.ajax(gHLocal+"/redmine-autofiller/"+brLocal+"/autofill.css").done(function(css){
   $("<style type='text/css'>"+css+"</style>").appendTo("head");
   $.getScript("https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.6/jquery-ui.min.js",function(){
+  $.getScript("https://code.jquery.com/jquery-migrate-1.4.1.js",function(){ 
    $.getScript(gH+"/Multiple-Dates-Picker-for-jQuery-UI/master/jquery-ui.multidatespicker.js",function(){
     $.getScript(gHLocal+"/redmine-autofiller/"+brLocal+"/setup.js",function(){
      var d=new Date(),c="ukr";
@@ -18,4 +19,5 @@
    });
   });
  });
+});
 }(jQuery));
