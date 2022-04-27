@@ -219,8 +219,7 @@
         $("#calendarPH").multiDatesPicker({ firstDay: 1 });
         setWorkingDates();
 
-        //$('.ui-datepicker').show();
-        //$('.ui-datepicker-prev, .ui-datepicker-next').show();
+        $("#calendarPH").multiDatesPicker("show");
 
         var actionWrapper = $("<div id='actionWrapper' class='actionWrapper'></div>");
         $("#fillWrapper").append(actionWrapper);
