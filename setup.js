@@ -58,7 +58,7 @@
                 console.log(entryToLog);
                 setTimeout(nextCall, 1000);
             } else {
-                $.post("/projects/" + projectId + "/timelog/edit", entryToLog, nextCall);
+                $.post("/time_entries", entryToLog, nextCall);
             }
         }
     };
