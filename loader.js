@@ -2,8 +2,7 @@
  $("<div id='ldr'>Loading...</div>").prependTo("#content");
  var debugMode = !!window.debug,sevice=debugMode?"raw.githack.com":"rawcdn.githack.com",
  gH="https://"+sevice+"/yurasidorets",br=debugMode?"test":"master";
- $.ajax(gH+"/redmine-autofiller/"+br+"/autofill.css").done(function(css){
-    console.log(css);
+ $.ajax(gH+"/redmine-autofiller/master/autofill.css").done(function(css){
   $("<style type='text/css'>"+css+"</style>").insertBefore($("head")[0].firstChild);
   $.getScript("https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.6/jquery-ui.min.js",function(){
   $.getScript("https://code.jquery.com/jquery-migrate-1.4.1.js",function(){    
